@@ -24,7 +24,7 @@ The library is structured as follows:
 ## Prerequisites
 
 - JUCE framework
-- VOICEVOX core library `voicevox_core`
+- VOICEVOX core library: `voicevox_core`
 - C++ compiler with C++17 support
 
 ## Installation
@@ -61,7 +61,7 @@ Once you complete these steps, you'll have the basic environment set up to use t
 
 ## License
 
-This project is licensed under [LICENSE]. Please see the LICENSE file for more details.
+This project is licensed under [LICENSE](LICENSE). Please see the LICENSE file for more details.
 
 ## Attention Regarding Licenses
 
@@ -98,7 +98,7 @@ JUCE フレームワーク用 VOICEVOX ラッパーライブラリ。
 ## 前提条件
 
 - JUCEフレームワーク
-- VOICEVOXコアライブラリ `voicevox_core`
+- VOICEVOXコアライブラリ: `voicevox_core`
 - C++17をサポートするC++コンパイラ
 
 ## インストール
@@ -112,7 +112,7 @@ JUCE フレームワーク用 VOICEVOX ラッパーライブラリ。
 
 ## 環境構築方法
 
-voicevox_juceライブラリを使用するには、Open JTalkの辞書ファイル、voicevox_coreの動的ライブラリ、ヘッダファイル、そしてモデルファイルが必要です。以下に、これらのファイルをダウンロードし、ライブラリで使用できるようにするための簡単なセットアップ手順を説明します。
+voicevox_juceライブラリを使用するには、Open JTalk の辞書ファイル、voicevox_coreの動的ライブラリ、ヘッダファイル、そしてモデルファイルが必要です。以下に、これらのファイルをダウンロードし、ライブラリで使用できるようにするための簡単なセットアップ手順を説明します。
 
 ### 1. voicevox_coreのダウンロードと配置
 
@@ -135,7 +135,7 @@ voicevox_juceライブラリを使用するには、Open JTalkの辞書ファイ
 
 ## ライセンス
 
-このプロジェクトは[LICENSE]の下でライセンスされています。詳細については、LICENSEファイルをご覧ください。
+このプロジェクトは [LICENSE](LICENSE) の下でライセンスされています。詳細については、LICENSE ファイルをご覧ください。
 
 ## ライセンスに関する注意
 
