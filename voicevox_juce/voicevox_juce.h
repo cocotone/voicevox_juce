@@ -9,7 +9,7 @@
 
   ID:                 voicevox_juce
   vendor:             COCOTONE
-  version:            1.0.0
+  version:            0.0.1
   name:               VOICEVOX wrapper library for JUCE framework.
   description:        Classes for creating VOICEVOX application with JUCE framework.
   website:            https://github.com/cocotone/voicevox_juce
