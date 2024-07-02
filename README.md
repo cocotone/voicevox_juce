@@ -17,7 +17,7 @@ The library is structured as follows:
 
 - `open_jtalk_dic_utf_8/`: Placement of OpenJTalk dictionary files (Need to be installed by developer)
 - `voicevox_core/`: Placement of voicevox_core files (Need to be installed by developer)
-- `voicevox_juce/`: Main wrapper library files
+- `voicevox_juce/`: Wrapper library that can be imported as a JUCE Module Format
   - `voicevox_client/`: Base classes for client-side implementation
   - `voicevox_core_host/`: Hosting class of voicevox_core library
 
@@ -82,7 +82,7 @@ JUCE フレームワーク用 VOICEVOX ラッパーライブラリ。
 
 ## ⚠️ 重要な注意事項
 
-- **このリポジトリは、VOICEVOX の非公式のラッパーライブラリです。**
+- **このリポジトリは、[VOICEVOX](https://voicevox.hiroshiba.jp/) の非公式のラッパーライブラリです。**
 - **このプロジェクトは実験段階であり、予告なく設計を変更する可能性があります。**
 
 ## 構造
@@ -91,7 +91,7 @@ JUCE フレームワーク用 VOICEVOX ラッパーライブラリ。
 
 - `open_jtalk_dic_utf_8/`: OpenJTalk辞書ファイルの配置場所（開発者によるインストールが必要）
 - `voicevox_core/`: voicevox_coreファイルの配置場所（開発者によるインストールが必要）
-- `voicevox_juce/`: メインのラッパーライブラリファイル
+- `voicevox_juce/`: JUCE Module Format としてインポート可能なラッパーライブラリ
   - `voicevox_client/`: クライアント側実装のためのベースクラス
   - `voicevox_core_host/`: voicevox_coreライブラリのホスティングクラス
 
