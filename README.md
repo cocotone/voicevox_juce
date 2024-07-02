@@ -4,7 +4,12 @@ VOICEVOX wrapper library for JUCE framework.
 
 ## Overview
 
-voicevox_juce is a wrapper library that enables the use of [VOICEVOX](https://voicevox.hiroshiba.jp/) within the [JUCE](https://juce.com/) framework. This library aims to simplify the integration of VOICEVOX's text-to-speech capabilities into JUCE-based applications.
+`voicevox_juce` is a wrapper library that enables the use of [voicevox_core](https://github.com/VOICEVOX/voicevox_core) within the [JUCE](https://juce.com/) framework. This library aims to simplify the integration of VOICEVOX's text-to-speech capabilities into JUCE-based applications.
+
+## ⚠️ Important Notes
+
+- **This repository is an unofficial wrapper library for [VOICEVOX](https://voicevox.hiroshiba.jp/).**
+- **This project is in an experimental stage and its design may change without prior notice.**
 
 ## Structure
 
@@ -19,7 +24,7 @@ The library is structured as follows:
 ## Prerequisites
 
 - JUCE framework
-- VOICEVOX core library
+- VOICEVOX core library `voicevox_core`
 - C++ compiler with C++17 support
 
 ## Installation
@@ -73,7 +78,12 @@ JUCE フレームワーク用 VOICEVOX ラッパーライブラリ。
 
 ## 概要
 
-voicevox_juce は、[JUCE](https://juce.com/)フレームワーク内で[VOICEVOX](https://voicevox.hiroshiba.jp/)を使用できるようにするラッパーライブラリです。このライブラリは、JUCEベースのアプリケーションにVOICEVOXのテキスト読み上げ機能を簡単に統合することを目的としています。
+`voicevox_juce` は、[JUCE](https://juce.com/) フレームワーク内で [voicevox_core](https://github.com/VOICEVOX/voicevox_core) を使用できるようにするラッパーライブラリです。このライブラリは、JUCEベースのアプリケーションにVOICEVOXのテキスト読み上げ機能を簡単に統合することを目的としています。
+
+## ⚠️ 重要な注意事項
+
+- **このリポジトリは、VOICEVOX の非公式のラッパーライブラリです。**
+- **このプロジェクトは実験段階であり、予告なく設計を変更する可能性があります。**
 
 ## 構造
 
@@ -88,7 +98,7 @@ voicevox_juce は、[JUCE](https://juce.com/)フレームワーク内で[VOICEVO
 ## 前提条件
 
 - JUCEフレームワーク
-- VOICEVOXコアライブラリ
+- VOICEVOXコアライブラリ `voicevox_core`
 - C++17をサポートするC++コンパイラ
 
 ## インストール
