@@ -1,0 +1,6 @@
+*
+!.gitignore
+
+!arm64/
+!x86_64/
+!universal/
