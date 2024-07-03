@@ -113,7 +113,7 @@ std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(int64_t speaker_id, const
 
     VoicevoxTtsOptions tts_options = voicevox_make_default_tts_options();
 
-    unsigned long long output_binary_size = 0;
+    uintptr_t output_binary_size = 0;
     uint8_t* output_wav = nullptr;
 
     VoicevoxResultCode result = voicevox_tts(speak_words.toRawUTF8(), speaker_id, tts_options, &output_binary_size, &output_wav);
