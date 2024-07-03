@@ -28,7 +28,10 @@ public:
 
     bool isHandled() const
     {
+#if JUCE_WINDOWS
         return (voicevoxCoreLibrary->getNativeHandle() != nullptr);
+#endif
+        return true;
     }
 
 private:
