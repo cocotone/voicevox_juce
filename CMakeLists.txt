@@ -56,9 +56,15 @@ if (COMMAND juce_add_module)
         add_library(voicevox_core SHARED IMPORTED GLOBAL)
 
         # Find library path.
+        file(GLOB VOICEVOX_CORE_LIB ${CMAKE_CURRENT_SOURCE_DIR}/voicevox_core/linux/libvoicevox_core.so)
+        
+        if(NOT VOICEVOX_CORE_LIB)
+            message(FATAL_ERROR "voicevox::voicevox_juce: Can't find libvoicevox_core.so")
+        endif()
+
         set_target_properties(voicevox_core
             PROPERTIES
-                IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/voicevox_core/linux/libvoicevox_core.so
+                IMPORTED_LOCATION ${VOICEVOX_CORE_LIB}
                 IMPORTED_NO_SONAME TRUE
                 INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/voicevox_core/linux
         )
@@ -70,9 +76,15 @@ if (COMMAND juce_add_module)
         add_library(onnxruntime SHARED IMPORTED GLOBAL)
 
         # Find library path.
+        file(GLOB ONNXRUNTIME_SHARED_LIB ${CMAKE_CURRENT_SOURCE_DIR}/voicevox_core/linux/libonnxruntime.so.*)
+
+        if(NOT ONNXRUNTIME_SHARED_LIB)
+            message(FATAL_ERROR "voicevox::voicevox_juce: Can't find libonnxruntime.so.*")
+        endif()
+
         set_target_properties(onnxruntime
             PROPERTIES
-                IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/voicevox_core/linux/libonnxruntime.so.1.13.1
+                IMPORTED_LOCATION ${ONNXRUNTIME_SHARED_LIB}
                 IMPORTED_NO_SONAME TRUE
         )
         set_property (TARGET onnxruntime APPEND PROPERTY LABELS onnxruntime)
