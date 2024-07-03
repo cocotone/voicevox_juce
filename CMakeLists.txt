@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.22)
 
 # This makes the assumption that JUCE is included in CMake project.
 if (COMMAND juce_add_module)
