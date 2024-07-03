@@ -50,7 +50,51 @@ if (COMMAND juce_add_module)
         set_property(TARGET voicevox_resource APPEND PROPERTY resource_model_dir "${CMAKE_CURRENT_SOURCE_DIR}/voicevox_core/windows/model")
         set_property(TARGET voicevox_resource APPEND PROPERTY resource_open_jtalk_dic_dir "${CMAKE_CURRENT_SOURCE_DIR}/open_jtalk_dic_utf_8")
         add_library(voicevox::voicevox_resource ALIAS voicevox_resource)
-    elseif (${CMAKE_SYSTEM_NAME} STREQUAL "macOS")
+    elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+        # Import as shared library in global scope.
+        add_library(voicevox_core SHARED IMPORTED GLOBAL)
+
+        # Find library path.
+        file(GLOB VOICEVOX_CORE_LIB ${CMAKE_CURRENT_SOURCE_DIR}/voicevox_core/macos/lib/arm64/libvoicevox_core.dylib)
+        
+        if(NOT VOICEVOX_CORE_LIB)
+            message(FATAL_ERROR "voicevox::voicevox_juce: Can't find libvoicevox_core.dylib")
+        endif()
+
+        set_target_properties(voicevox_core
+            PROPERTIES
+                IMPORTED_LOCATION ${VOICEVOX_CORE_LIB}
+                IMPORTED_NO_SONAME TRUE
+                INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/voicevox_core/macos/include
+        )
+
+        set_property (TARGET voicevox_core APPEND PROPERTY LABELS voicevox_core)
+        add_library(voicevox::voicevox_core ALIAS voicevox_core)
+
+        # Import as shared library in global scope.
+        add_library(onnxruntime SHARED IMPORTED GLOBAL)
+
+        # Find library path.
+        file(GLOB ONNXRUNTIME_SHARED_LIB ${CMAKE_CURRENT_SOURCE_DIR}/voicevox_core/macos/lib/arm64/libonnxruntime.*.dylib)
+
+        if(NOT ONNXRUNTIME_SHARED_LIB)
+            message(FATAL_ERROR "voicevox::voicevox_juce: Can't find libonnxruntime.*.dylib")
+        endif()
+
+        set_target_properties(onnxruntime
+            PROPERTIES
+                IMPORTED_LOCATION ${ONNXRUNTIME_SHARED_LIB}
+                IMPORTED_NO_SONAME TRUE
+        )
+        set_property (TARGET onnxruntime APPEND PROPERTY LABELS onnxruntime)
+        add_library(voicevox::onnxruntime ALIAS onnxruntime)
+
+        # Add resource importer target.
+        add_library(voicevox_resource INTERFACE)
+        set_property (TARGET voicevox_resource APPEND PROPERTY LABELS voicevox_resource)
+        set_property(TARGET voicevox_resource APPEND PROPERTY resource_model_dir "${CMAKE_CURRENT_SOURCE_DIR}/voicevox_core/macos/model")
+        set_property(TARGET voicevox_resource APPEND PROPERTY resource_open_jtalk_dic_dir "${CMAKE_CURRENT_SOURCE_DIR}/open_jtalk_dic_utf_8")
+        add_library(voicevox::voicevox_resource ALIAS voicevox_resource)
     elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         # Import as shared library in global scope.
         add_library(voicevox_core SHARED IMPORTED GLOBAL)
