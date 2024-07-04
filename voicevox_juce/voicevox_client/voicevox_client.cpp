@@ -53,6 +53,16 @@ juce::Result VoicevoxClient::loadModel(int64_t speaker_id)
     return juce::Result::fail("Disconnected");
 }
 
+std::optional<juce::MemoryBlock> VoicevoxClient::synthesis(int64_t speaker_id, const juce::String& audio_query_json)
+{
+    if (isConnected())
+    {
+        return sharedVoicevoxCoreHost.get()->getObject().synthesis(speaker_id, audio_query_json);
+    }
+
+    return std::nullopt;
+}
+
 std::optional<juce::MemoryBlock> VoicevoxClient::tts(int64_t speaker_id, const juce::String& speak_words)
 {
     if (isConnected())

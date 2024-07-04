@@ -110,6 +110,53 @@ juce::Result VoicevoxCoreHost::loadModel(int64_t speaker_id)
     return juce::Result::ok();
 }
 
+std::optional<juce::String> VoicevoxCoreHost::makeAudioQuery(int64_t speaker_id, const juce::String& speak_words)
+{
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    char* output_audio_query_json;
+
+    VoicevoxAudioQueryOptions audio_query_options = voicevox_make_default_audio_query_options();
+
+    VoicevoxResultCode result = voicevox_audio_query(speak_words.toRawUTF8(), speaker_id, audio_query_options, &output_audio_query_json);
+
+    if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
+        const char* utf8Str = voicevox_error_result_to_message(result);
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8(utf8Str));
+        return std::nullopt;
+    }
+
+    const auto audio_query_json_string = juce::String(juce::CharPointer_UTF8(output_audio_query_json));
+
+    juce::Logger::outputDebugString(audio_query_json_string);
+
+    voicevox_audio_query_json_free(output_audio_query_json);
+
+    return audio_query_json_string;
+}
+
+std::optional<juce::MemoryBlock> VoicevoxCoreHost::synthesis(int64_t speaker_id, const juce::String& audio_query_json)
+{
+    VoicevoxSynthesisOptions synthesis_options = voicevox_make_default_synthesis_options();
+
+    uintptr_t output_binary_size = 0;
+    uint8_t* output_wav = nullptr;
+
+    VoicevoxResultCode result = voicevox_synthesis(audio_query_json.toRawUTF8(), speaker_id, synthesis_options, &output_binary_size, &output_wav);
+
+    if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
+        const char* utf8Str = voicevox_error_result_to_message(result);
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8(utf8Str));
+        return std::nullopt;
+    }
+
+    juce::MemoryBlock memory_block(output_wav, output_binary_size);
+
+    voicevox_wav_free(output_wav);
+
+    return memory_block;
+}
+
 std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(int64_t speaker_id, const juce::String& speak_words)
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
@@ -133,6 +180,7 @@ std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(int64_t speaker_id, const
 
     return memory_block;
 }
+
 }
 
 

@@ -18,6 +18,9 @@ public:
     //==============================================================================
     juce::var getMetasJson();
     juce::Result loadModel(int64_t speaker_id);
+
+    std::optional<juce::String> makeAudioQuery(int64_t speaker_id, const juce::String& speak_words);
+    std::optional<juce::MemoryBlock> synthesis(int64_t speaker_id, const juce::String& audio_query_json);
     std::optional<juce::MemoryBlock> tts(int64_t speaker_id, const juce::String& speak_words);
 
 private:
