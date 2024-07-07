@@ -2,10 +2,12 @@
 
 #include <juce_core/juce_core.h>
 
-#include "../voicevox_core_host/voicevox_core_host.h"
-
 namespace voicevox
 {
+
+//==============================================================================
+class VoicevoxCoreHost;
+using SharedVoicevoxCoreHost = juce::SharedResourcePointer<voicevox::VoicevoxCoreHost>;
 
 //==============================================================================
 class VoicevoxClient final

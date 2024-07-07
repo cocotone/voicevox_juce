@@ -30,8 +30,9 @@ public:
     {
 #if JUCE_WINDOWS
         return (voicevoxCoreLibrary->getNativeHandle() != nullptr);
-#endif
+#else
         return true;
+#endif
     }
 
 private:
@@ -49,8 +50,8 @@ VoicevoxCoreHost::VoicevoxCoreHost()
 
     auto options = voicevox_make_default_initialize_options();
 
-    // Some audio plugin host process like DAW can't handle GPU environment.
-    options.acceleration_mode = VoicevoxAccelerationMode::VOICEVOX_ACCELERATION_MODE_CPU;
+    // NOTE: Some audio plugin host process like DAW can't handle GPU environment.
+    options.acceleration_mode = VoicevoxAccelerationMode::VOICEVOX_ACCELERATION_MODE_AUTO;
 
     auto jtalk_dict_dir = juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile)
         .getParentDirectory()
@@ -81,6 +82,26 @@ juce::String VoicevoxCoreHost::getVersion() const
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
     return juce::String(juce::CharPointer_UTF8(voicevox_get_version()));
+}
+
+//==============================================================================
+juce::var VoicevoxCoreHost::getSupportedDevicesJson() const
+{
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    juce::var result_json;
+
+    const auto devices_json = voicevox_get_supported_devices_json();
+    juce::JSON::parse(juce::CharPointer_UTF8(devices_json), result_json);
+
+    return result_json;
+}
+
+bool VoicevoxCoreHost::isGPUMode() const
+{
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    return voicevox_is_gpu_mode();
 }
 
 //==============================================================================

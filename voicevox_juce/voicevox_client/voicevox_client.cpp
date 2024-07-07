@@ -1,4 +1,5 @@
 #include "voicevox_client.h"
+#include "../voicevox_core_host/voicevox_core_host.h"
 
 namespace voicevox
 {
@@ -21,6 +22,12 @@ void VoicevoxClient::connect()
     isConnected_ = true;
 
     juce::Logger::outputDebugString("[voicevox_juce] voicevox_core version: " + sharedVoicevoxCoreHost->getObject().getVersion());
+
+    const auto devices = juce::JSON::toString(sharedVoicevoxCoreHost->getObject().getSupportedDevicesJson());
+    juce::Logger::outputDebugString("[voicevox_juce] voicevox_core supported devices: " + devices);
+
+    const juce::String str_is_gpu_mode = sharedVoicevoxCoreHost->getObject().isGPUMode() ? "true" : "false";
+    juce::Logger::outputDebugString("[voicevox_juce] voicevox_core is gpu mode: " + str_is_gpu_mode);
 }
 
 void VoicevoxClient::disconnect()

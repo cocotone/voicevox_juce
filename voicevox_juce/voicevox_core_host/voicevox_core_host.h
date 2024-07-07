@@ -19,6 +19,10 @@ public:
     juce::String getVersion() const;
 
     //==============================================================================
+    juce::var getSupportedDevicesJson() const;
+    bool isGPUMode() const;
+
+    //==============================================================================
     juce::var getMetasJson() const;
     juce::Result loadModel(juce::uint32 speaker_id);
     bool isModelLoaded(juce::uint32 speaker_id) const;
