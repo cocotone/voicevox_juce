@@ -292,7 +292,7 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::decode(juce::uint32 speaker_
      * @param output_decode_data_length uintptr_t 分のメモリ領域が割り当てられていること
      * @param output_decode_data 成功後にメモリ領域が割り当てられるので ::voicevox_decode_data_free で解放する必要がある
      */
-    VoicevoxResultCode result = voicevox_decode(length, phoneme_size, f0_vector.data(), phoneme_vector.data(), speaker_id, &output_data_length, &output_data);
+    VoicevoxResultCode result = voicevox_decode(f0_vector.size(), phoneme_vector.size(), f0_vector.data(), phoneme_vector.data(), speaker_id, &output_data_length, &output_data);
 
     if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
         const char* utf8Str = voicevox_error_result_to_message(result);
