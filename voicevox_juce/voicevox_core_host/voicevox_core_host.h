@@ -28,11 +28,17 @@ public:
     bool isModelLoaded(juce::uint32 speaker_id) const;
 
     //==============================================================================
+    std::optional<juce::Array<float>> decode(juce::uint32 speaker_id, const juce::var& decode_args);
+
     std::optional<juce::String> makeAudioQuery(juce::uint32 speaker_id, const juce::String& speak_words);
     std::optional<juce::MemoryBlock> synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json);
     std::optional<juce::MemoryBlock> tts(juce::uint32 speaker_id, const juce::String& speak_words);
 
 private:
+    //==============================================================================
+    std::optional<juce::Array<float>> predictDuration();
+    std::optional<juce::Array<float>> predictIntonation();
+
     //==============================================================================
     juce::SharedResourcePointer<VoicevoxCoreLibraryLoader> sharedVoicevoxCoreLibrary;
     
