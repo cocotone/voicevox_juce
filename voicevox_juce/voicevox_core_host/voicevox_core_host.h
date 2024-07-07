@@ -30,7 +30,9 @@ public:
 
     //==============================================================================
     std::optional<juce::Array<float>> decode(juce::uint32 speaker_id, std::vector<float> f0_vector, std::vector<float> phoneme_vector);
+    std::optional<juce::Array<float>> sf_decode_forward(juce::uint32 speaker_id, std::vector<std::int64_t> phoneme_vector, std::vector<float> f0_vector, std::vector<float> volume_vector);
 
+    //==============================================================================
     std::optional<juce::String> makeAudioQuery(juce::uint32 speaker_id, const juce::String& speak_words);
     std::optional<juce::MemoryBlock> synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json);
     std::optional<juce::MemoryBlock> tts(juce::uint32 speaker_id, const juce::String& speak_words);

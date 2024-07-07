@@ -100,7 +100,7 @@ std::optional<juce::Array<juce::Array<float>>> VoicevoxClient::humming(juce::uin
         juce::Array<juce::Array<float>> decoded_block_list;
 
 #if 1
-        const auto decoded_block = sharedVoicevoxCoreHost->getObject().decode(speaker_id, decode_source.f0Vector, decode_source.phonemeVector);
+        const auto decoded_block = sharedVoicevoxCoreHost->getObject().sf_decode_forward(speaker_id, decode_source.phonemeVector, decode_source.f0Vector, decode_source.volumeVector);
         if (decoded_block.has_value())
         {
             decoded_block_list.add(decoded_block.value());

@@ -35,6 +35,8 @@ public:
 #endif
     }
 
+    juce::DynamicLibrary* getDynamicLibrary() const { return voicevoxCoreLibrary.get(); }
+
 private:
 
     std::unique_ptr<juce::DynamicLibrary> voicevoxCoreLibrary;
@@ -306,6 +308,51 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::decode(juce::uint32 speaker_
 
     return output_buffer;
 }
+
+/*
+pub extern "C" fn sf_decode_forward(
+    length: i64,
+    phoneme: *mut i64,
+    f0: *mut f32,
+    volume: *mut f32,
+    speaker_id: *mut i64,
+    output: *mut f32,
+) -> bool {
+*/
+using voicevox_sf_decode = bool(*) (int64_t, int64_t*, float*, float*, int64_t*, float*);
+
+std::optional<juce::Array<float>> VoicevoxCoreHost::sf_decode_forward(juce::uint32 speaker_id, std::vector<std::int64_t> phoneme_vector, std::vector<float> f0_vector, std::vector<float> volume_vector)
+{
+    int64_t speaker_id_i64 = speaker_id;
+
+    // NOTE: decode function is processed under 24kHz due to hard coded in core library.
+
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    uintptr_t output_data_length = f0_vector.size() * 256;
+
+    juce::HeapBlock<float> output_data;
+    output_data.malloc(output_data_length);
+
+    auto func_sf_decode = (voicevox_sf_decode)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("sf_decode_forward");
+    if (func_sf_decode == nullptr)
+    {
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] sf_decode_forward function is not found."));
+        return std::nullopt;
+    }
+
+    auto is_success = func_sf_decode(f0_vector.size(), phoneme_vector.data(), f0_vector.data(), volume_vector.data(), &speaker_id_i64, output_data.getData());
+    if (!is_success)
+    {
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] sf_decode_forward function is failure."));
+        return std::nullopt;
+    }
+
+    juce::Array<float> output_buffer(output_data.getData(), output_data_length);
+
+    return output_buffer;
+}
+
 
 //==============================================================================
 std::optional<juce::String> VoicevoxCoreHost::makeAudioQuery(juce::uint32 speaker_id, const juce::String& speak_words)

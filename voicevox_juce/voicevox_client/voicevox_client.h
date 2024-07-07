@@ -11,9 +11,11 @@ using SharedVoicevoxCoreHost = juce::SharedResourcePointer<voicevox::VoicevoxCor
 
 struct VoicevoxDecodeSource
 {
-    std::vector<float> f0Vector;
-    std::vector<float> phonemeVector;
-    double sampleRate;
+    std::vector<float> f0Vector{};
+    std::vector<float> volumeVector{};
+    std::vector<std::int64_t> phonemeVector{};
+    std::int64_t phonemeSize{ 0 };
+    double sampleRate{ 0 };
 
     JUCE_LEAK_DETECTOR(VoicevoxDecodeSource)
 };
