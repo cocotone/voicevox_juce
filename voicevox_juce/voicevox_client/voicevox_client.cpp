@@ -99,13 +99,31 @@ std::optional<juce::Array<juce::Array<float>>> VoicevoxClient::humming(juce::uin
     {
         juce::Array<juce::Array<float>> decoded_block_list;
 
-        for (int seq_idx = 0; seq_idx < 10; seq_idx++)
+#if 0
+        const int num_render_block = 100
+        for (int block_idx = 0; block_idx < num_render_block; block_idx++)
         {
             const auto decoded_block = sharedVoicevoxCoreHost->getObject().decode(speaker_id, humming_source);
             if (decoded_block.has_value())
             {
                 decoded_block_list.add(decoded_block.value());
             }
+        }
+#else
+        for (int seq_idx = 0; seq_idx < 100; seq_idx++)
+        {
+            juce::Array<float> block;
+            for (int i = 0; i < 512; i++)
+            {
+                block.add(std::sinf(juce::MathConstants<float>::twoPi * i / 512 * 8) * 0.6f);
+            }
+            decoded_block_list.add(block);
+        }
+#endif
+
+        if (decoded_block_list.size() == 0)
+        {
+            return std::nullopt;
         }
 
         return decoded_block_list;

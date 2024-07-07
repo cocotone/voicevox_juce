@@ -287,8 +287,6 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::decode(juce::uint32 speaker_
     std::array<float, 256> phoneme_vector;
     float* pv = phoneme_vector.data();
 
-    uint32_t speaker_id = 0;
-
     uintptr_t output_data_length = 0;
 
     std::array<float, 256> output_data;
