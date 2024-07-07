@@ -152,7 +152,8 @@ bool VoicevoxCoreHost::isModelLoaded(juce::uint32 speaker_id) const
     return voicevox_is_model_loaded((uint32_t)speaker_id);
 }
 
-
+#if 0
+//==============================================================================
 std::optional<juce::Array<float>> VoicevoxCoreHost::predictDuration()
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
@@ -308,6 +309,7 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::decode(juce::uint32 speaker_
 
     return output_buffer;
 }
+#endif
 
 /*
 pub extern "C" fn sf_decode_forward(

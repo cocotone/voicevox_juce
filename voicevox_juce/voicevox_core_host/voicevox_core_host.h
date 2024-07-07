@@ -29,7 +29,6 @@ public:
     bool isModelLoaded(juce::uint32 speaker_id) const;
 
     //==============================================================================
-    std::optional<juce::Array<float>> decode(juce::uint32 speaker_id, std::vector<float> f0_vector, std::vector<float> phoneme_vector);
     std::optional<juce::Array<float>> sf_decode_forward(juce::uint32 speaker_id, std::vector<std::int64_t> phoneme_vector, std::vector<float> f0_vector, std::vector<float> volume_vector);
 
     //==============================================================================
@@ -38,9 +37,12 @@ public:
     std::optional<juce::MemoryBlock> tts(juce::uint32 speaker_id, const juce::String& speak_words);
 
 private:
+#if 0
     //==============================================================================
+    std::optional<juce::Array<float>> decode(juce::uint32 speaker_id, std::vector<float> f0_vector, std::vector<float> phoneme_vector);
     std::optional<juce::Array<float>> predictDuration();
     std::optional<juce::Array<float>> predictIntonation();
+#endif
 
     //==============================================================================
     juce::SharedResourcePointer<VoicevoxCoreLibraryLoader> sharedVoicevoxCoreLibrary;
