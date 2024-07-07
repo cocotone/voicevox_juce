@@ -93,21 +93,17 @@ std::optional<juce::MemoryBlock> VoicevoxClient::tts(juce::uint32 speaker_id, co
     return std::nullopt;
 }
 
-std::optional<juce::Array<juce::Array<float>>> VoicevoxClient::humming(juce::uint32 speaker_id, const juce::var& humming_source)
+std::optional<juce::Array<juce::Array<float>>> VoicevoxClient::humming(juce::uint32 speaker_id, const VoicevoxDecodeSource& decode_source)
 {
     if (isConnected())
     {
         juce::Array<juce::Array<float>> decoded_block_list;
 
-#if 0
-        const int num_render_block = 100
-        for (int block_idx = 0; block_idx < num_render_block; block_idx++)
+#if 1
+        const auto decoded_block = sharedVoicevoxCoreHost->getObject().decode(speaker_id, decode_source.f0Vector, decode_source.phonemeVector);
+        if (decoded_block.has_value())
         {
-            const auto decoded_block = sharedVoicevoxCoreHost->getObject().decode(speaker_id, humming_source);
-            if (decoded_block.has_value())
-            {
-                decoded_block_list.add(decoded_block.value());
-            }
+            decoded_block_list.add(decoded_block.value());
         }
 #else
         for (int seq_idx = 0; seq_idx < 100; seq_idx++)

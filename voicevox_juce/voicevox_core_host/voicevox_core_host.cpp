@@ -84,6 +84,12 @@ juce::String VoicevoxCoreHost::getVersion() const
     return juce::String(juce::CharPointer_UTF8(voicevox_get_version()));
 }
 
+double VoicevoxCoreHost::getSampleRate() const
+{
+    // NOTE: decode function is processed under 24kHz due to hard coding in core library.
+    return 24000.0;
+}
+
 //==============================================================================
 juce::var VoicevoxCoreHost::getSupportedDevicesJson() const
 {
@@ -147,6 +153,8 @@ bool VoicevoxCoreHost::isModelLoaded(juce::uint32 speaker_id) const
 
 std::optional<juce::Array<float>> VoicevoxCoreHost::predictDuration()
 {
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
     /**
      * 音素ごとの長さを推論する
      * @param [in] length phoneme_vector, output のデータ長
@@ -191,6 +199,8 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::predictDuration()
 
 std::optional<juce::Array<float>> VoicevoxCoreHost::predictIntonation()
 {
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
     /**
      * モーラごとのF0を推論する
      * @param [in] length vowel_phoneme_vector, consonant_phoneme_vector, start_accent_vector, end_accent_vector, start_accent_phrase_vector, end_accent_phrase_vector, output のデータ長
@@ -258,41 +268,16 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::predictIntonation()
     return output_buffer;
 }
 
-std::optional<juce::Array<float>> VoicevoxCoreHost::decode(juce::uint32 speaker_id, const juce::var& decode_args)
+std::optional<juce::Array<float>> VoicevoxCoreHost::decode(juce::uint32 speaker_id, std::vector<float> f0_vector, std::vector<float> phoneme_vector)
 {
-    /**
-      * decodeを実行する
-      * @param [in] length f0 , output のデータ長及び phoneme のデータ長に関連する
-      * @param [in] phoneme_size 音素のサイズ phoneme のデータ長に関連する
-      * @param [in] f0 基本周波数
-      * @param [in] phoneme_vector 音素データ
-      * @param [in] speaker_id 話者ID
-      * @param [out] output_decode_data_length 出力先データのサイズ
-      * @param [out] output_decode_data データ出力先
-      * @return 結果コード #VoicevoxResultCode
-      *
-      * # Safety
-      * @param f0 必ず length の長さだけデータがある状態で渡すこと
-      * @param phoneme_vector 必ず length * phoneme_size の長さだけデータがある状態で渡すこと
-      * @param output_decode_data_length uintptr_t 分のメモリ領域が割り当てられていること
-      * @param output_decode_data 成功後にメモリ領域が割り当てられるので ::voicevox_decode_data_free で解放する必要がある
-      */
+    // NOTE: decode function is processed under 24kHz due to hard coded in core library.
 
-    uintptr_t length = 256;
-    uintptr_t phoneme_size = 256;
-
-    std::array<float, 256> f0_vector;
-    float* fzv = f0_vector.data();
-
-    std::array<float, 256> phoneme_vector;
-    float* pv = phoneme_vector.data();
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
 
     uintptr_t output_data_length = 0;
+    float* output_data = nullptr;
 
-    std::array<float, 256> output_data;
-    float* odv = output_data.data();
-
-    VoicevoxResultCode result = voicevox_decode(length, phoneme_size, fzv, pv, speaker_id, &output_data_length, &odv);
+    VoicevoxResultCode result = voicevox_decode(f0_vector.size(), phoneme_vector.size(), f0_vector.data(), phoneme_vector.data(), speaker_id, &output_data_length, &output_data);
 
     if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
         const char* utf8Str = voicevox_error_result_to_message(result);
@@ -300,9 +285,9 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::decode(juce::uint32 speaker_
         return std::nullopt;
     }
 
-    juce::Array<float> output_buffer(odv, output_data_length);
+    juce::Array<float> output_buffer(output_data, output_data_length);
 
-    voicevox_decode_data_free(odv);
+    voicevox_decode_data_free(output_data);
 
     return output_buffer;
 }
@@ -335,6 +320,10 @@ std::optional<juce::String> VoicevoxCoreHost::makeAudioQuery(juce::uint32 speake
 
 std::optional<juce::MemoryBlock> VoicevoxCoreHost::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
 {
+    // NOTE: Ouptut wav binary is sample rate converted to request value, therefore, the processing is effected after decode in core library.
+
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
     VoicevoxSynthesisOptions synthesis_options = voicevox_make_default_synthesis_options();
 
     uintptr_t output_binary_size = 0;
@@ -357,6 +346,8 @@ std::optional<juce::MemoryBlock> VoicevoxCoreHost::synthesis(juce::uint32 speake
 
 std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(juce::uint32 speaker_id, const juce::String& speak_words)
 {
+    // NOTE: Ouptut wav binary is sample rate converted to request value, therefore, the processing is effected after decode in core library.
+
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
     VoicevoxTtsOptions tts_options = voicevox_make_default_tts_options();
