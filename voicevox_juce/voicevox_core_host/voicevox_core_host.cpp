@@ -47,8 +47,6 @@ VoicevoxCoreHost::VoicevoxCoreHost()
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
-    juce::Logger::outputDebugString(juce::String(voicevox_get_version()));
-
     auto options = voicevox_make_default_initialize_options();
 
     // Some audio plugin host process like DAW can't handle GPU environment.
@@ -78,7 +76,15 @@ VoicevoxCoreHost::~VoicevoxCoreHost()
 }
 
 //==============================================================================
-juce::var VoicevoxCoreHost::getMetasJson()
+juce::String VoicevoxCoreHost::getVersion() const
+{
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    return juce::String(juce::CharPointer_UTF8(voicevox_get_version()));
+}
+
+//==============================================================================
+juce::var VoicevoxCoreHost::getMetasJson() const
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
@@ -90,7 +96,7 @@ juce::var VoicevoxCoreHost::getMetasJson()
     return result_json;
 }
 
-juce::Result VoicevoxCoreHost::loadModel(int64_t speaker_id)
+juce::Result VoicevoxCoreHost::loadModel(juce::uint32 speaker_id)
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
@@ -110,7 +116,15 @@ juce::Result VoicevoxCoreHost::loadModel(int64_t speaker_id)
     return juce::Result::ok();
 }
 
-std::optional<juce::String> VoicevoxCoreHost::makeAudioQuery(int64_t speaker_id, const juce::String& speak_words)
+bool VoicevoxCoreHost::isModelLoaded(juce::uint32 speaker_id) const
+{
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    return voicevox_is_model_loaded((uint32_t)speaker_id);
+}
+
+//==============================================================================
+std::optional<juce::String> VoicevoxCoreHost::makeAudioQuery(juce::uint32 speaker_id, const juce::String& speak_words)
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
@@ -118,7 +132,7 @@ std::optional<juce::String> VoicevoxCoreHost::makeAudioQuery(int64_t speaker_id,
 
     VoicevoxAudioQueryOptions audio_query_options = voicevox_make_default_audio_query_options();
 
-    VoicevoxResultCode result = voicevox_audio_query(speak_words.toRawUTF8(), speaker_id, audio_query_options, &output_audio_query_json);
+    VoicevoxResultCode result = voicevox_audio_query(speak_words.toRawUTF8(), (uint32_t)speaker_id, audio_query_options, &output_audio_query_json);
 
     if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
         const char* utf8Str = voicevox_error_result_to_message(result);
@@ -135,14 +149,14 @@ std::optional<juce::String> VoicevoxCoreHost::makeAudioQuery(int64_t speaker_id,
     return audio_query_json_string;
 }
 
-std::optional<juce::MemoryBlock> VoicevoxCoreHost::synthesis(int64_t speaker_id, const juce::String& audio_query_json)
+std::optional<juce::MemoryBlock> VoicevoxCoreHost::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
 {
     VoicevoxSynthesisOptions synthesis_options = voicevox_make_default_synthesis_options();
 
     uintptr_t output_binary_size = 0;
     uint8_t* output_wav = nullptr;
 
-    VoicevoxResultCode result = voicevox_synthesis(audio_query_json.toRawUTF8(), speaker_id, synthesis_options, &output_binary_size, &output_wav);
+    VoicevoxResultCode result = voicevox_synthesis(audio_query_json.toRawUTF8(), (uint32_t)speaker_id, synthesis_options, &output_binary_size, &output_wav);
 
     if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
         const char* utf8Str = voicevox_error_result_to_message(result);
@@ -157,7 +171,7 @@ std::optional<juce::MemoryBlock> VoicevoxCoreHost::synthesis(int64_t speaker_id,
     return memory_block;
 }
 
-std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(int64_t speaker_id, const juce::String& speak_words)
+std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(juce::uint32 speaker_id, const juce::String& speak_words)
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
@@ -166,7 +180,7 @@ std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(int64_t speaker_id, const
     uintptr_t output_binary_size = 0;
     uint8_t* output_wav = nullptr;
 
-    VoicevoxResultCode result = voicevox_tts(speak_words.toRawUTF8(), speaker_id, tts_options, &output_binary_size, &output_wav);
+    VoicevoxResultCode result = voicevox_tts(speak_words.toRawUTF8(), (uint32_t)speaker_id, tts_options, &output_binary_size, &output_wav);
 
     if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
         const char* utf8Str = voicevox_error_result_to_message(result);

@@ -21,11 +21,13 @@ public:
     bool isConnected() const;
 
     //==============================================================================
-    juce::var getMetasJson();
-    juce::Result loadModel(int64_t speaker_id);
+    juce::var getMetasJson() const;
+    juce::Result loadModel(juce::uint32 speaker_id);
+    bool isModelLoaded(juce::uint32 speaker_id) const;
 
-    std::optional<juce::MemoryBlock> synthesis(int64_t speaker_id, const juce::String& audio_query_json);
-    std::optional<juce::MemoryBlock> tts(int64_t speaker_id, const juce::String& speak_words);
+    //==============================================================================
+    std::optional<juce::MemoryBlock> synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json);
+    std::optional<juce::MemoryBlock> tts(juce::uint32 speaker_id, const juce::String& speak_words);
 
 private:
     //==============================================================================

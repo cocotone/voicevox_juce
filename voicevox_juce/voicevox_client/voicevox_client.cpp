@@ -19,6 +19,8 @@ void VoicevoxClient::connect()
 {
     sharedVoicevoxCoreHost = std::make_unique<voicevox::SharedVoicevoxCoreHost>();
     isConnected_ = true;
+
+    juce::Logger::outputDebugString("[voicevox_juce] voicevox_core version: " + sharedVoicevoxCoreHost->getObject().getVersion());
 }
 
 void VoicevoxClient::disconnect()
@@ -33,41 +35,52 @@ bool VoicevoxClient::isConnected() const
 }
 
 //==============================================================================
-juce::var VoicevoxClient::getMetasJson()
+juce::var VoicevoxClient::getMetasJson() const
 {
     if (isConnected())
     {
-        return sharedVoicevoxCoreHost.get()->getObject().getMetasJson();
+        return sharedVoicevoxCoreHost->getObject().getMetasJson();
     }
 
     return juce::var();
 }
 
-juce::Result VoicevoxClient::loadModel(int64_t speaker_id)
+juce::Result VoicevoxClient::loadModel(juce::uint32 speaker_id)
 {
     if (isConnected())
     {
-        return sharedVoicevoxCoreHost.get()->getObject().loadModel(speaker_id);
+        return sharedVoicevoxCoreHost->getObject().loadModel(speaker_id);
     }
 
     return juce::Result::fail("Disconnected");
 }
 
-std::optional<juce::MemoryBlock> VoicevoxClient::synthesis(int64_t speaker_id, const juce::String& audio_query_json)
+bool VoicevoxClient::isModelLoaded(juce::uint32 speaker_id) const
 {
     if (isConnected())
     {
-        return sharedVoicevoxCoreHost.get()->getObject().synthesis(speaker_id, audio_query_json);
+        return sharedVoicevoxCoreHost->getObject().isModelLoaded(speaker_id);
+    }
+
+    return false;
+}
+
+//==============================================================================
+std::optional<juce::MemoryBlock> VoicevoxClient::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
+{
+    if (isConnected())
+    {
+        return sharedVoicevoxCoreHost->getObject().synthesis(speaker_id, audio_query_json);
     }
 
     return std::nullopt;
 }
 
-std::optional<juce::MemoryBlock> VoicevoxClient::tts(int64_t speaker_id, const juce::String& speak_words)
+std::optional<juce::MemoryBlock> VoicevoxClient::tts(juce::uint32 speaker_id, const juce::String& speak_words)
 {
     if (isConnected())
     {
-        return sharedVoicevoxCoreHost.get()->getObject().tts(speaker_id, speak_words);
+        return sharedVoicevoxCoreHost->getObject().tts(speaker_id, speak_words);
     }
 
     return std::nullopt;
