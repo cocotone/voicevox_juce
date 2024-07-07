@@ -155,6 +155,18 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::predictDuration()
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
+    uintptr_t length = 256;
+
+    std::array<int64_t, 256> phoneme_vector;
+    int64_t* pv = phoneme_vector.data();
+
+    uint32_t speaker_id = 0;
+
+    uintptr_t output_data_length = 0;
+
+    std::array<float, 256> output_data;
+    float* odv = output_data.data();
+
     /**
      * 音素ごとの長さを推論する
      * @param [in] length phoneme_vector, output のデータ長
@@ -169,19 +181,6 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::predictDuration()
      * @param output_predict_duration_data_length uintptr_t 分のメモリ領域が割り当てられていること
      * @param output_predict_duration_data 成功後にメモリ領域が割り当てられるので ::voicevox_predict_duration_data_free で解放する必要がある
      */
-
-    uintptr_t length = 256;
-
-    std::array<int64_t, 256> phoneme_vector;
-    int64_t* pv = phoneme_vector.data();
-
-    uint32_t speaker_id = 0;
-
-    uintptr_t output_data_length = 0;
-
-    std::array<float, 256> output_data;
-    float* odv = output_data.data();
-
     VoicevoxResultCode result = voicevox_predict_duration(length, pv, speaker_id, &output_data_length, &odv);
 
     if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
@@ -200,31 +199,6 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::predictDuration()
 std::optional<juce::Array<float>> VoicevoxCoreHost::predictIntonation()
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
-
-    /**
-     * モーラごとのF0を推論する
-     * @param [in] length vowel_phoneme_vector, consonant_phoneme_vector, start_accent_vector, end_accent_vector, start_accent_phrase_vector, end_accent_phrase_vector, output のデータ長
-     * @param [in] vowel_phoneme_vector 母音の音素データ
-     * @param [in] consonant_phoneme_vector 子音の音素データ
-     * @param [in] start_accent_vector アクセントの開始位置のデータ
-     * @param [in] end_accent_vector アクセントの終了位置のデータ
-     * @param [in] start_accent_phrase_vector アクセント句の開始位置のデータ
-     * @param [in] end_accent_phrase_vector アクセント句の終了位置のデータ
-     * @param [in] speaker_id 話者ID
-     * @param [out] output_predict_intonation_data_length 出力データのサイズ
-     * @param [out] output_predict_intonation_data データの出力先
-     * @return 結果コード #VoicevoxResultCode
-     *
-     * # Safety
-     * @param vowel_phoneme_vector 必ずlengthの長さだけデータがある状態で渡すこと
-     * @param consonant_phoneme_vector 必ずlengthの長さだけデータがある状態で渡すこと
-     * @param start_accent_vector 必ずlengthの長さだけデータがある状態で渡すこと
-     * @param end_accent_vector 必ずlengthの長さだけデータがある状態で渡すこと
-     * @param start_accent_phrase_vector 必ずlengthの長さだけデータがある状態で渡すこと
-     * @param end_accent_phrase_vector 必ずlengthの長さだけデータがある状態で渡すこと
-     * @param output_predict_intonation_data_length uintptr_t 分のメモリ領域が割り当てられていること
-     * @param output_predict_intonation_data 成功後にメモリ領域が割り当てられるので ::voicevox_predict_intonation_data_free で解放する必要がある
-     */
 
     uintptr_t length = 256;
 
@@ -253,6 +227,30 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::predictIntonation()
     std::array<float, 256> output_data;
     float* odv = output_data.data();
 
+    /**
+     * モーラごとのF0を推論する
+     * @param [in] length vowel_phoneme_vector, consonant_phoneme_vector, start_accent_vector, end_accent_vector, start_accent_phrase_vector, end_accent_phrase_vector, output のデータ長
+     * @param [in] vowel_phoneme_vector 母音の音素データ
+     * @param [in] consonant_phoneme_vector 子音の音素データ
+     * @param [in] start_accent_vector アクセントの開始位置のデータ
+     * @param [in] end_accent_vector アクセントの終了位置のデータ
+     * @param [in] start_accent_phrase_vector アクセント句の開始位置のデータ
+     * @param [in] end_accent_phrase_vector アクセント句の終了位置のデータ
+     * @param [in] speaker_id 話者ID
+     * @param [out] output_predict_intonation_data_length 出力データのサイズ
+     * @param [out] output_predict_intonation_data データの出力先
+     * @return 結果コード #VoicevoxResultCode
+     *
+     * # Safety
+     * @param vowel_phoneme_vector 必ずlengthの長さだけデータがある状態で渡すこと
+     * @param consonant_phoneme_vector 必ずlengthの長さだけデータがある状態で渡すこと
+     * @param start_accent_vector 必ずlengthの長さだけデータがある状態で渡すこと
+     * @param end_accent_vector 必ずlengthの長さだけデータがある状態で渡すこと
+     * @param start_accent_phrase_vector 必ずlengthの長さだけデータがある状態で渡すこと
+     * @param end_accent_phrase_vector 必ずlengthの長さだけデータがある状態で渡すこと
+     * @param output_predict_intonation_data_length uintptr_t 分のメモリ領域が割り当てられていること
+     * @param output_predict_intonation_data 成功後にメモリ領域が割り当てられるので ::voicevox_predict_intonation_data_free で解放する必要がある
+     */
     VoicevoxResultCode result = voicevox_predict_intonation(length, vpv, cpv, sav, eav, sapv, eapv, speaker_id, &output_data_length, &odv);
 
     if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
@@ -277,7 +275,24 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::decode(juce::uint32 speaker_
     uintptr_t output_data_length = 0;
     float* output_data = nullptr;
 
-    VoicevoxResultCode result = voicevox_decode(f0_vector.size(), phoneme_vector.size(), f0_vector.data(), phoneme_vector.data(), speaker_id, &output_data_length, &output_data);
+    /**
+     * decodeを実行する
+     * @param [in] length f0 , output のデータ長及び phoneme のデータ長に関連する
+     * @param [in] phoneme_size 音素のサイズ phoneme のデータ長に関連する
+     * @param [in] f0 基本周波数
+     * @param [in] phoneme_vector 音素データ
+     * @param [in] speaker_id 話者ID
+     * @param [out] output_decode_data_length 出力先データのサイズ
+     * @param [out] output_decode_data データ出力先
+     * @return 結果コード #VoicevoxResultCode
+     *
+     * # Safety
+     * @param f0 必ず length の長さだけデータがある状態で渡すこと
+     * @param phoneme_vector 必ず length * phoneme_size の長さだけデータがある状態で渡すこと
+     * @param output_decode_data_length uintptr_t 分のメモリ領域が割り当てられていること
+     * @param output_decode_data 成功後にメモリ領域が割り当てられるので ::voicevox_decode_data_free で解放する必要がある
+     */
+    VoicevoxResultCode result = voicevox_decode(length, phoneme_size, f0_vector.data(), phoneme_vector.data(), speaker_id, &output_data_length, &output_data);
 
     if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
         const char* utf8Str = voicevox_error_result_to_message(result);
