@@ -9,15 +9,13 @@ namespace voicevox
 class VoicevoxCoreHost;
 using SharedVoicevoxCoreHost = juce::SharedResourcePointer<voicevox::VoicevoxCoreHost>;
 
-struct VoicevoxDecodeSource
+struct VoicevoxSfDecodeSource
 {
     std::vector<float> f0Vector{};
     std::vector<float> volumeVector{};
     std::vector<std::int64_t> phonemeVector{};
-    std::int64_t phonemeSize{ 0 };
-    double sampleRate{ 0 };
 
-    JUCE_LEAK_DETECTOR(VoicevoxDecodeSource)
+    JUCE_LEAK_DETECTOR(VoicevoxSfDecodeSource)
 };
 
 //==============================================================================
@@ -41,7 +39,7 @@ public:
     //==============================================================================
     std::optional<juce::MemoryBlock> synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json);
     std::optional<juce::MemoryBlock> tts(juce::uint32 speaker_id, const juce::String& speak_words);
-    std::optional<juce::Array<juce::Array<float>>> humming(juce::uint32 speaker_id, const VoicevoxDecodeSource& decode_source);
+    std::optional<juce::Array<float>> singBySfDecode(juce::uint32 speaker_id, const VoicevoxSfDecodeSource& decode_source);
 
 private:
     //==============================================================================

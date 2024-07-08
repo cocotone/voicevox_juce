@@ -93,7 +93,7 @@ std::optional<juce::MemoryBlock> VoicevoxClient::tts(juce::uint32 speaker_id, co
     return std::nullopt;
 }
 
-std::optional<juce::Array<juce::Array<float>>> VoicevoxClient::humming(juce::uint32 speaker_id, const VoicevoxDecodeSource& decode_source)
+std::optional<juce::Array<float>> VoicevoxClient::singBySfDecode(juce::uint32 speaker_id, const VoicevoxSfDecodeSource& decode_source)
 {
     if (isConnected())
     {
@@ -102,15 +102,8 @@ std::optional<juce::Array<juce::Array<float>>> VoicevoxClient::humming(juce::uin
         const auto decoded_block = sharedVoicevoxCoreHost->getObject().sf_decode_forward(speaker_id, decode_source.phonemeVector, decode_source.f0Vector, decode_source.volumeVector);
         if (decoded_block.has_value())
         {
-            decoded_block_list.add(decoded_block.value());
+            return decoded_block;
         }
-
-        if (decoded_block_list.size() == 0)
-        {
-            return std::nullopt;
-        }
-
-        return decoded_block_list;
     }
 
     return std::nullopt;
