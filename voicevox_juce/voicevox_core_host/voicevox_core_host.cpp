@@ -434,17 +434,17 @@ std::optional<std::vector<float>> VoicevoxCoreHost::predict_sing_volume_forward(
     juce::HeapBlock<float> output_data;
     output_data.malloc(output_data_length);
 
-    const auto function_predict_sing_f0_forward = (voicevox_predict_sing_volume_forward)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("predict_sing_f0_forward");
-    if (function_predict_sing_f0_forward == nullptr)
+    const auto function_predict_sing_volume_forward = (voicevox_predict_sing_volume_forward)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("predict_sing_volume_forward");
+    if (function_predict_sing_volume_forward == nullptr)
     {
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_f0_forward function is not found."));
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_volume_forward function is not found."));
         return std::nullopt;
     }
 
-    const auto is_success = function_predict_sing_f0_forward(phoneme.size(), phoneme.data(), note.data(), f0 .data(), & speaker_id_i64, output_data.getData());
+    const auto is_success = function_predict_sing_volume_forward(phoneme.size(), phoneme.data(), note.data(), f0 .data(), & speaker_id_i64, output_data.getData());
     if (!is_success)
     {
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_f0_forward function is failure."));
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_volume_forward function is failure."));
         return std::nullopt;
     }
 

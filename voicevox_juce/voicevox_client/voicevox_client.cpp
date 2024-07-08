@@ -82,6 +82,11 @@ double VoicevoxClient::getSampleRate() const
     return 0.0;
 }
 
+std::int64_t VoicevoxClient::getSongTeacherSpeakerId() const
+{
+    return 6000;
+}
+
 //==============================================================================
 std::optional<juce::MemoryBlock> VoicevoxClient::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
 {
@@ -103,11 +108,11 @@ std::optional<juce::MemoryBlock> VoicevoxClient::tts(juce::uint32 speaker_id, co
     return std::nullopt;
 }
 
-std::optional<std::vector<std::int64_t>> VoicevoxClient::predictSingConsonantLength(juce::uint32 speaker_id, const std::vector<std::int64_t>& consonant, const std::vector<std::int64_t>& vowel, const std::vector<std::int64_t>& note_duration)
+std::optional<std::vector<std::int64_t>> VoicevoxClient::predictSingConsonantLength(juce::uint32 speaker_id, const std::vector<std::int64_t>& note_consonant_vector, const std::vector<std::int64_t>& note_vowel_vector, const std::vector<std::int64_t>& note_length_vector)
 {
     if (isConnected())
     {
-        return sharedVoicevoxCoreHost->getObject().predict_sing_consonant_length_forward(speaker_id, consonant, vowel, note_duration);
+        return sharedVoicevoxCoreHost->getObject().predict_sing_consonant_length_forward(speaker_id, note_consonant_vector, note_vowel_vector, note_length_vector);
     }
 
     return std::nullopt;

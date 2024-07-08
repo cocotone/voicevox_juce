@@ -37,13 +37,14 @@ public:
     bool isModelLoaded(juce::uint32 speaker_id) const;
 
     double getSampleRate() const;
+    std::int64_t getSongTeacherSpeakerId() const;
 
     //==============================================================================
     std::optional<juce::MemoryBlock> synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json);
     std::optional<juce::MemoryBlock> tts(juce::uint32 speaker_id, const juce::String& speak_words);
 
     std::optional<std::vector<std::int64_t>> predictSingConsonantLength(juce::uint32 speaker_id, const std::vector<std::int64_t>& note_consonant_vector, const std::vector<std::int64_t>& note_vowel_vector, const std::vector<std::int64_t>& note_length_vector);
-    std::optional<std::vector<float>> predictSingF0(juce::uint32 speaker_idd, const std::vector<std::int64_t>& phoneme, const std::vector<std::int64_t>& note);
+    std::optional<std::vector<float>> predictSingF0(juce::uint32 speaker_id, const std::vector<std::int64_t>& phoneme, const std::vector<std::int64_t>& note);
     std::optional<std::vector<float>> predictSingVolume(juce::uint32 speaker_id, const std::vector<std::int64_t>& phoneme, const std::vector<std::int64_t>& note, const std::vector<float>& f0);
     std::optional<juce::Array<float>> singBySfDecode(juce::uint32 speaker_id, const VoicevoxSfDecodeSource& decode_source);
 
