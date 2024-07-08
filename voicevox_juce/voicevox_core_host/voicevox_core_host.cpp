@@ -19,6 +19,16 @@ public:
         voicevoxCoreLibrary = std::make_unique<juce::DynamicLibrary>(dll_file_to_open.getFullPathName());
 
         jassert(voicevoxCoreLibrary->getNativeHandle() != nullptr);
+#elif JUCE_MAC
+        auto dll_file_to_open =
+            juce::File::getSpecialLocation(juce::File::SpecialLocationType::currentExecutableFile)
+            .getSiblingFile("libvoicevox_core.dylib");
+
+        jassert(dll_file_to_open.existsAsFile());
+
+        voicevoxCoreLibrary = std::make_unique<juce::DynamicLibrary>(dll_file_to_open.getFullPathName());
+
+        jassert(voicevoxCoreLibrary->getNativeHandle() != nullptr);
 #endif
     }
 
@@ -29,6 +39,8 @@ public:
     bool isHandled() const
     {
 #if JUCE_WINDOWS
+        return (voicevoxCoreLibrary->getNativeHandle() != nullptr);
+#elif JUCE_MAC
         return (voicevoxCoreLibrary->getNativeHandle() != nullptr);
 #else
         return true;
