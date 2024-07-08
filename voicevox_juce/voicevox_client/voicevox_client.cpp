@@ -72,6 +72,16 @@ bool VoicevoxClient::isModelLoaded(juce::uint32 speaker_id) const
     return false;
 }
 
+double VoicevoxClient::getSampleRate() const
+{
+    if (isConnected())
+    {
+        return sharedVoicevoxCoreHost->getObject().getSampleRate();
+    }
+
+    return 0.0;
+}
+
 //==============================================================================
 std::optional<juce::MemoryBlock> VoicevoxClient::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
 {
@@ -93,17 +103,41 @@ std::optional<juce::MemoryBlock> VoicevoxClient::tts(juce::uint32 speaker_id, co
     return std::nullopt;
 }
 
+std::optional<juce::Array<juce::uint64>> VoicevoxClient::predictSingConsonantLength(juce::uint32 speaker_id, const std::vector<std::int64_t>& consonant, const std::vector<std::int64_t>& vowel, const std::vector<std::int64_t>& note_duration)
+{
+    if (isConnected())
+    {
+        return sharedVoicevoxCoreHost->getObject().predict_sing_consonant_length_forward(speaker_id, consonant, vowel, note_duration);
+    }
+
+    return std::nullopt;
+}
+
+std::optional<juce::Array<float>> VoicevoxClient::predictSingF0(juce::uint32 speaker_id, const std::vector<std::int64_t>& phoneme, const std::vector<std::int64_t>& note)
+{
+    if (isConnected())
+    {
+        return sharedVoicevoxCoreHost->getObject().predict_sing_f0_forward(speaker_id, phoneme, note);
+    }
+
+    return std::nullopt;
+}
+
+std::optional<juce::Array<float>> VoicevoxClient::predictSingVolume(juce::uint32 speaker_id, const std::vector<std::int64_t>& phoneme, const std::vector<std::int64_t>& note, const std::vector<float>& f0)
+{
+    if (isConnected())
+    {
+        return sharedVoicevoxCoreHost->getObject().predict_sing_volume_forward(speaker_id, phoneme, note, f0);
+    }
+
+    return std::nullopt;
+}
+
 std::optional<juce::Array<float>> VoicevoxClient::singBySfDecode(juce::uint32 speaker_id, const VoicevoxSfDecodeSource& decode_source)
 {
     if (isConnected())
     {
-        juce::Array<juce::Array<float>> decoded_block_list;
-
-        const auto decoded_block = sharedVoicevoxCoreHost->getObject().sf_decode_forward(speaker_id, decode_source.phonemeVector, decode_source.f0Vector, decode_source.volumeVector);
-        if (decoded_block.has_value())
-        {
-            return decoded_block;
-        }
+        return sharedVoicevoxCoreHost->getObject().sf_decode_forward(speaker_id, decode_source.phonemeVector, decode_source.f0Vector, decode_source.volumeVector);
     }
 
     return std::nullopt;

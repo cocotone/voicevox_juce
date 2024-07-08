@@ -36,9 +36,15 @@ public:
     juce::Result loadModel(juce::uint32 speaker_id);
     bool isModelLoaded(juce::uint32 speaker_id) const;
 
+    double getSampleRate() const;
+
     //==============================================================================
     std::optional<juce::MemoryBlock> synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json);
     std::optional<juce::MemoryBlock> tts(juce::uint32 speaker_id, const juce::String& speak_words);
+
+    std::optional<juce::Array<juce::uint64>> predictSingConsonantLength(juce::uint32 speaker_id, const std::vector<std::int64_t>& consonant, const std::vector<std::int64_t>& vowel, const std::vector<std::int64_t>& note_duration);
+    std::optional<juce::Array<float>> predictSingF0(juce::uint32 speaker_idd, const std::vector<std::int64_t>& phoneme, const std::vector<std::int64_t>& note);
+    std::optional<juce::Array<float>> predictSingVolume(juce::uint32 speaker_id, const std::vector<std::int64_t>& phoneme, const std::vector<std::int64_t>& note, const std::vector<float>& f0);
     std::optional<juce::Array<float>> singBySfDecode(juce::uint32 speaker_id, const VoicevoxSfDecodeSource& decode_source);
 
 private:
