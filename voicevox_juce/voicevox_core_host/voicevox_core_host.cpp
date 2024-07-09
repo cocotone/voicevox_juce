@@ -164,6 +164,249 @@ bool VoicevoxCoreHost::isModelLoaded(juce::uint32 speaker_id) const
     return voicevox_is_model_loaded((uint32_t)speaker_id);
 }
 
+//==============================================================================
+std::optional<juce::String> VoicevoxCoreHost::makeAudioQuery(juce::uint32 speaker_id, const juce::String& speak_words)
+{
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    char* output_audio_query_json;
+
+    VoicevoxAudioQueryOptions audio_query_options = voicevox_make_default_audio_query_options();
+
+    VoicevoxResultCode result = voicevox_audio_query(speak_words.toRawUTF8(), (uint32_t)speaker_id, audio_query_options, &output_audio_query_json);
+
+    if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
+        const char* utf8Str = voicevox_error_result_to_message(result);
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8(utf8Str));
+        return std::nullopt;
+    }
+
+    const auto audio_query_json_string = juce::String(juce::CharPointer_UTF8(output_audio_query_json));
+
+    voicevox_audio_query_json_free(output_audio_query_json);
+
+    return audio_query_json_string;
+}
+
+std::optional<juce::MemoryBlock> VoicevoxCoreHost::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
+{
+    // NOTE: Ouptut wav binary is sample rate converted to request value, therefore, the processing is effected after decode in core library.
+
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    VoicevoxSynthesisOptions synthesis_options = voicevox_make_default_synthesis_options();
+
+    uintptr_t output_binary_size = 0;
+    uint8_t* output_wav = nullptr;
+
+    VoicevoxResultCode result = voicevox_synthesis(audio_query_json.toRawUTF8(), (uint32_t)speaker_id, synthesis_options, &output_binary_size, &output_wav);
+
+    if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
+        const char* utf8Str = voicevox_error_result_to_message(result);
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8(utf8Str));
+        return std::nullopt;
+    }
+
+    juce::MemoryBlock memory_block(output_wav, output_binary_size);
+
+    voicevox_wav_free(output_wav);
+
+    return memory_block;
+}
+
+std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(juce::uint32 speaker_id, const juce::String& speak_words)
+{
+    // NOTE: Ouptut wav binary is sample rate converted to request value, therefore, the processing is effected after decode in core library.
+
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    VoicevoxTtsOptions tts_options = voicevox_make_default_tts_options();
+
+    uintptr_t output_binary_size = 0;
+    uint8_t* output_wav = nullptr;
+
+    VoicevoxResultCode result = voicevox_tts(speak_words.toRawUTF8(), (uint32_t)speaker_id, tts_options, &output_binary_size, &output_wav);
+
+    if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
+        const char* utf8Str = voicevox_error_result_to_message(result);
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8(utf8Str));
+        return std::nullopt;
+    }
+
+    juce::MemoryBlock memory_block(output_wav, output_binary_size);
+
+    voicevox_wav_free(output_wav);
+
+    return memory_block;
+}
+
+//==============================================================================
+/*
+* 
+#[no_mangle]
+pub extern "C" fn predict_sing_consonant_length_forward(
+    length: i64,
+    consonant: *mut i64,
+    vowel: *mut i64,
+    note_duration: *mut i64,
+    speaker_id: *mut i64,
+    output: *mut i64,
+) -> bool {
+*/
+using voicevox_predict_sing_consonant_length_forward = bool(*) (int64_t /*length*/, int64_t* /*consonant*/, int64_t* /*vowel*/, int64_t* /*note_duration*/, int64_t* /*speaker_id*/, int64_t* /*output*/);
+
+std::optional<std::vector<std::int64_t>> VoicevoxCoreHost::predict_sing_consonant_length_forward(juce::uint32 speaker_id, std::vector<std::int64_t> consonant, std::vector<std::int64_t> vowel, std::vector<std::int64_t> note_duration)
+{
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    int64_t speaker_id_i64 = speaker_id;
+
+    uintptr_t output_data_length = consonant.size();
+
+    juce::HeapBlock<std::int64_t> output_data;
+    output_data.malloc(output_data_length);
+
+    const auto function_predict_sing_consonant_length_forward = (voicevox_predict_sing_consonant_length_forward)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("predict_sing_consonant_length_forward");
+    if (function_predict_sing_consonant_length_forward == nullptr)
+    {
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_consonant_length_forward function is not found."));
+        return std::nullopt;
+    }
+
+    const auto is_success = function_predict_sing_consonant_length_forward(consonant.size(), consonant.data(), vowel.data(), note_duration.data(), &speaker_id_i64, output_data.getData());
+    if (!is_success)
+    {
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_consonant_length_forward function is failure."));
+        return std::nullopt;
+    }
+
+    return std::vector<std::int64_t>(output_data.getData(), output_data.getData() + output_data_length);
+}
+
+/**
+#[no_mangle]
+pub extern "C" fn predict_sing_f0_forward(
+    length: i64,
+    phoneme: *mut i64,
+    note: *mut i64,
+    speaker_id: *mut i64,
+    output: *mut f32,
+) -> bool {
+*/
+using voicevox_predict_sing_f0_forward = bool(*) (int64_t /*length*/, int64_t* /*phoneme*/, int64_t* /*note*/, int64_t* /*speaker_id*/, float* /*output*/);
+
+std::optional<std::vector<float>> VoicevoxCoreHost::predict_sing_f0_forward(juce::uint32 speaker_id, std::vector<std::int64_t> phoneme, std::vector<std::int64_t> note)
+{
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    int64_t speaker_id_i64 = speaker_id;
+
+    uintptr_t output_data_length = phoneme.size();
+
+    juce::HeapBlock<float> output_data;
+    output_data.malloc(output_data_length);
+
+    const auto function_predict_sing_f0_forward = (voicevox_predict_sing_f0_forward)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("predict_sing_f0_forward");
+    if (function_predict_sing_f0_forward == nullptr)
+    {
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_f0_forward function is not found."));
+        return std::nullopt;
+    }
+
+    const auto is_success = function_predict_sing_f0_forward(phoneme.size(), phoneme.data(), note.data(), &speaker_id_i64, output_data.getData());
+    if (!is_success)
+    {
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_f0_forward function is failure."));
+        return std::nullopt;
+    }
+
+    return std::vector<float>(output_data.getData(), output_data.getData() + output_data_length);
+}
+
+/**
+#[no_mangle]
+pub extern "C" fn predict_sing_volume_forward(
+    length: i64,
+    phoneme: *mut i64,
+    note: *mut i64,
+    f0: *mut f32,
+    speaker_id: *mut i64,
+    output: *mut f32,
+) -> bool {
+*/
+using voicevox_predict_sing_volume_forward = bool(*) (int64_t /*length*/, int64_t* /*phoneme*/, int64_t* /*note*/, float* /*f0*/, int64_t* /*speaker_id*/, float* /*output*/);
+
+std::optional<std::vector<float>> VoicevoxCoreHost::predict_sing_volume_forward(juce::uint32 speaker_id, std::vector<std::int64_t> phoneme, std::vector<std::int64_t> note, std::vector<float> f0)
+{
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+    
+    int64_t speaker_id_i64 = speaker_id;
+
+    uintptr_t output_data_length = phoneme.size();
+
+    juce::HeapBlock<float> output_data;
+    output_data.malloc(output_data_length);
+
+    const auto function_predict_sing_volume_forward = (voicevox_predict_sing_volume_forward)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("predict_sing_volume_forward");
+    if (function_predict_sing_volume_forward == nullptr)
+    {
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_volume_forward function is not found."));
+        return std::nullopt;
+    }
+
+    const auto is_success = function_predict_sing_volume_forward(phoneme.size(), phoneme.data(), note.data(), f0 .data(), & speaker_id_i64, output_data.getData());
+    if (!is_success)
+    {
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_volume_forward function is failure."));
+        return std::nullopt;
+    }
+
+    return std::vector<float>(output_data.getData(), output_data.getData() + output_data_length);
+}
+
+/**
+pub extern "C" fn sf_decode_forward(
+    length: i64,
+    phoneme: *mut i64,
+    f0: *mut f32,
+    volume: *mut f32,
+    speaker_id: *mut i64,
+    output: *mut f32,
+) -> bool {
+*/
+using voicevox_sf_decode_forward = bool(*) (int64_t /*length*/, int64_t* /*phoneme*/, float* /*f0*/, float* /*volume*/, int64_t* /*speaker_id*/, float* /*output*/);
+
+std::optional<std::vector<float>> VoicevoxCoreHost::sf_decode_forward(juce::uint32 speaker_id, std::vector<std::int64_t> phoneme_vector, std::vector<float> f0_vector, std::vector<float> volume_vector)
+{
+    jassert(sharedVoicevoxCoreLibrary->isHandled());
+
+    int64_t speaker_id_i64 = speaker_id;
+
+    uintptr_t output_data_length = f0_vector.size() * 256;
+
+    juce::HeapBlock<float> output_data;
+    output_data.malloc(output_data_length);
+
+    const auto function_sf_decode_forward = (voicevox_sf_decode_forward)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("sf_decode_forward");
+    if (function_sf_decode_forward == nullptr)
+    {
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] sf_decode_forward function is not found."));
+        return std::nullopt;
+    }
+
+    // NOTE: sf_decode_forward function is processed under 24kHz due to hard coded in core library.
+    const auto is_success = function_sf_decode_forward(f0_vector.size(), phoneme_vector.data(), f0_vector.data(), volume_vector.data(), &speaker_id_i64, output_data.getData());
+    if (!is_success)
+    {
+        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] sf_decode_forward function is failure."));
+        return std::nullopt;
+    }
+
+    return std::vector<float>(output_data.getData(), output_data.getData() + output_data_length);
+}
+
+
+
 #if 0
 //==============================================================================
 std::optional<juce::Array<float>> VoicevoxCoreHost::predictDuration()
@@ -323,257 +566,6 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::decode(juce::uint32 speaker_
 }
 #endif
 
-
-/*
-* 
-#[no_mangle]
-pub extern "C" fn predict_sing_consonant_length_forward(
-    length: i64,
-    consonant: *mut i64,
-    vowel: *mut i64,
-    note_duration: *mut i64,
-    speaker_id: *mut i64,
-    output: *mut i64,
-) -> bool {
-*/
-using voicevox_predict_sing_consonant_length_forward = bool(*) (int64_t /*length*/, int64_t* /*consonant*/, int64_t* /*vowel*/, int64_t* /*note_duration*/, int64_t* /*speaker_id*/, int64_t* /*output*/);
-
-std::optional<std::vector<std::int64_t>> VoicevoxCoreHost::predict_sing_consonant_length_forward(juce::uint32 speaker_id, std::vector<std::int64_t> consonant, std::vector<std::int64_t> vowel, std::vector<std::int64_t> note_duration)
-{
-    jassert(sharedVoicevoxCoreLibrary->isHandled());
-
-    int64_t speaker_id_i64 = speaker_id;
-
-    uintptr_t output_data_length = consonant.size();
-
-    juce::HeapBlock<std::int64_t> output_data;
-    output_data.malloc(output_data_length);
-
-    const auto function_predict_sing_consonant_length_forward = (voicevox_predict_sing_consonant_length_forward)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("predict_sing_consonant_length_forward");
-    if (function_predict_sing_consonant_length_forward == nullptr)
-    {
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_consonant_length_forward function is not found."));
-        return std::nullopt;
-    }
-
-    const auto is_success = function_predict_sing_consonant_length_forward(consonant.size(), consonant.data(), vowel.data(), note_duration.data(), &speaker_id_i64, output_data.getData());
-    if (!is_success)
-    {
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_consonant_length_forward function is failure."));
-        return std::nullopt;
-    }
-
-    std::vector<std::int64_t> output_buffer(output_data.getData(), output_data.getData() + output_data_length);
-
-    return output_buffer;
-}
-
-/**
-#[no_mangle]
-pub extern "C" fn predict_sing_f0_forward(
-    length: i64,
-    phoneme: *mut i64,
-    note: *mut i64,
-    speaker_id: *mut i64,
-    output: *mut f32,
-) -> bool {
-*/
-using voicevox_predict_sing_f0_forward = bool(*) (int64_t /*length*/, int64_t* /*phoneme*/, int64_t* /*note*/, int64_t* /*speaker_id*/, float* /*output*/);
-
-std::optional<std::vector<float>> VoicevoxCoreHost::predict_sing_f0_forward(juce::uint32 speaker_id, std::vector<std::int64_t> phoneme, std::vector<std::int64_t> note)
-{
-    jassert(sharedVoicevoxCoreLibrary->isHandled());
-
-    int64_t speaker_id_i64 = speaker_id;
-
-    uintptr_t output_data_length = phoneme.size();
-
-    juce::HeapBlock<float> output_data;
-    output_data.malloc(output_data_length);
-
-    const auto function_predict_sing_f0_forward = (voicevox_predict_sing_f0_forward)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("predict_sing_f0_forward");
-    if (function_predict_sing_f0_forward == nullptr)
-    {
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_f0_forward function is not found."));
-        return std::nullopt;
-    }
-
-    const auto is_success = function_predict_sing_f0_forward(phoneme.size(), phoneme.data(), note.data(), &speaker_id_i64, output_data.getData());
-    if (!is_success)
-    {
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_f0_forward function is failure."));
-        return std::nullopt;
-    }
-
-    std::vector<float> output_buffer(output_data.getData(), output_data.getData() + output_data_length);
-
-    return output_buffer;
-}
-
-/**
-#[no_mangle]
-pub extern "C" fn predict_sing_volume_forward(
-    length: i64,
-    phoneme: *mut i64,
-    note: *mut i64,
-    f0: *mut f32,
-    speaker_id: *mut i64,
-    output: *mut f32,
-) -> bool {
-*/
-using voicevox_predict_sing_volume_forward = bool(*) (int64_t /*length*/, int64_t* /*phoneme*/, int64_t* /*note*/, float* /*f0*/, int64_t* /*speaker_id*/, float* /*output*/);
-
-std::optional<std::vector<float>> VoicevoxCoreHost::predict_sing_volume_forward(juce::uint32 speaker_id, std::vector<std::int64_t> phoneme, std::vector<std::int64_t> note, std::vector<float> f0)
-{
-    jassert(sharedVoicevoxCoreLibrary->isHandled());
-    
-    int64_t speaker_id_i64 = speaker_id;
-
-    uintptr_t output_data_length = phoneme.size();
-
-    juce::HeapBlock<float> output_data;
-    output_data.malloc(output_data_length);
-
-    const auto function_predict_sing_volume_forward = (voicevox_predict_sing_volume_forward)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("predict_sing_volume_forward");
-    if (function_predict_sing_volume_forward == nullptr)
-    {
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_volume_forward function is not found."));
-        return std::nullopt;
-    }
-
-    const auto is_success = function_predict_sing_volume_forward(phoneme.size(), phoneme.data(), note.data(), f0 .data(), & speaker_id_i64, output_data.getData());
-    if (!is_success)
-    {
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] predict_sing_volume_forward function is failure."));
-        return std::nullopt;
-    }
-
-    std::vector<float> output_buffer(output_data.getData(), output_data.getData() + output_data_length);
-
-    return output_buffer;
-}
-
-/**
-pub extern "C" fn sf_decode_forward(
-    length: i64,
-    phoneme: *mut i64,
-    f0: *mut f32,
-    volume: *mut f32,
-    speaker_id: *mut i64,
-    output: *mut f32,
-) -> bool {
-*/
-using voicevox_sf_decode_forward = bool(*) (int64_t /*length*/, int64_t* /*phoneme*/, float* /*f0*/, float* /*volume*/, int64_t* /*speaker_id*/, float* /*output*/);
-
-std::optional<juce::Array<float>> VoicevoxCoreHost::sf_decode_forward(juce::uint32 speaker_id, std::vector<std::int64_t> phoneme_vector, std::vector<float> f0_vector, std::vector<float> volume_vector)
-{
-    jassert(sharedVoicevoxCoreLibrary->isHandled());
-
-    int64_t speaker_id_i64 = speaker_id;
-
-    uintptr_t output_data_length = f0_vector.size() * 256;
-
-    juce::HeapBlock<float> output_data;
-    output_data.malloc(output_data_length);
-
-    const auto function_sf_decode_forward = (voicevox_sf_decode_forward)sharedVoicevoxCoreLibrary->getDynamicLibrary()->getFunction("sf_decode_forward");
-    if (function_sf_decode_forward == nullptr)
-    {
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] sf_decode_forward function is not found."));
-        return std::nullopt;
-    }
-
-    // NOTE: sf_decode_forward function is processed under 24kHz due to hard coded in core library.
-    const auto is_success = function_sf_decode_forward(f0_vector.size(), phoneme_vector.data(), f0_vector.data(), volume_vector.data(), &speaker_id_i64, output_data.getData());
-    if (!is_success)
-    {
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8("[voicevox_juce] sf_decode_forward function is failure."));
-        return std::nullopt;
-    }
-
-    juce::Array<float> output_buffer(output_data.getData(), output_data_length);
-
-    return output_buffer;
-}
-
-
-//==============================================================================
-std::optional<juce::String> VoicevoxCoreHost::makeAudioQuery(juce::uint32 speaker_id, const juce::String& speak_words)
-{
-    jassert(sharedVoicevoxCoreLibrary->isHandled());
-
-    char* output_audio_query_json;
-
-    VoicevoxAudioQueryOptions audio_query_options = voicevox_make_default_audio_query_options();
-
-    VoicevoxResultCode result = voicevox_audio_query(speak_words.toRawUTF8(), (uint32_t)speaker_id, audio_query_options, &output_audio_query_json);
-
-    if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
-        const char* utf8Str = voicevox_error_result_to_message(result);
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8(utf8Str));
-        return std::nullopt;
-    }
-
-    const auto audio_query_json_string = juce::String(juce::CharPointer_UTF8(output_audio_query_json));
-
-    juce::Logger::outputDebugString(audio_query_json_string);
-
-    voicevox_audio_query_json_free(output_audio_query_json);
-
-    return audio_query_json_string;
-}
-
-std::optional<juce::MemoryBlock> VoicevoxCoreHost::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
-{
-    // NOTE: Ouptut wav binary is sample rate converted to request value, therefore, the processing is effected after decode in core library.
-
-    jassert(sharedVoicevoxCoreLibrary->isHandled());
-
-    VoicevoxSynthesisOptions synthesis_options = voicevox_make_default_synthesis_options();
-
-    uintptr_t output_binary_size = 0;
-    uint8_t* output_wav = nullptr;
-
-    VoicevoxResultCode result = voicevox_synthesis(audio_query_json.toRawUTF8(), (uint32_t)speaker_id, synthesis_options, &output_binary_size, &output_wav);
-
-    if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
-        const char* utf8Str = voicevox_error_result_to_message(result);
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8(utf8Str));
-        return std::nullopt;
-    }
-
-    juce::MemoryBlock memory_block(output_wav, output_binary_size);
-
-    voicevox_wav_free(output_wav);
-
-    return memory_block;
-}
-
-std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(juce::uint32 speaker_id, const juce::String& speak_words)
-{
-    // NOTE: Ouptut wav binary is sample rate converted to request value, therefore, the processing is effected after decode in core library.
-
-    jassert(sharedVoicevoxCoreLibrary->isHandled());
-
-    VoicevoxTtsOptions tts_options = voicevox_make_default_tts_options();
-
-    uintptr_t output_binary_size = 0;
-    uint8_t* output_wav = nullptr;
-
-    VoicevoxResultCode result = voicevox_tts(speak_words.toRawUTF8(), (uint32_t)speaker_id, tts_options, &output_binary_size, &output_wav);
-
-    if (result != VoicevoxResultCode::VOICEVOX_RESULT_OK) {
-        const char* utf8Str = voicevox_error_result_to_message(result);
-        juce::Logger::outputDebugString(juce::CharPointer_UTF8(utf8Str));
-        return std::nullopt;
-    }
-
-    juce::MemoryBlock memory_block(output_wav, output_binary_size);
-
-    voicevox_wav_free(output_wav);
-
-    return memory_block;
-}
 
 }
 
