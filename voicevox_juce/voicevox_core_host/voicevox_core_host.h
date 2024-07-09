@@ -17,7 +17,6 @@ public:
 
     //==============================================================================
     juce::String getVersion() const;
-    double getSampleRate() const;
 
     //==============================================================================
     juce::var getSupportedDevicesJson() const;
@@ -27,6 +26,9 @@ public:
     juce::var getMetasJson() const;
     juce::Result loadModel(juce::uint32 speaker_id);
     bool isModelLoaded(juce::uint32 speaker_id) const;
+
+    //==============================================================================
+    double getSampleRate() const;
 
     //==============================================================================
     // High level API

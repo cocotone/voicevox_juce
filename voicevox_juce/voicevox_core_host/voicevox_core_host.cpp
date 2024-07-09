@@ -98,12 +98,6 @@ juce::String VoicevoxCoreHost::getVersion() const
     return juce::String(juce::CharPointer_UTF8(voicevox_get_version()));
 }
 
-double VoicevoxCoreHost::getSampleRate() const
-{
-    // NOTE: decode function is processed under 24kHz due to hard coding in core library.
-    return 24000.0;
-}
-
 //==============================================================================
 juce::var VoicevoxCoreHost::getSupportedDevicesJson() const
 {
@@ -162,6 +156,13 @@ bool VoicevoxCoreHost::isModelLoaded(juce::uint32 speaker_id) const
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
     return voicevox_is_model_loaded((uint32_t)speaker_id);
+}
+
+//==============================================================================
+double VoicevoxCoreHost::getSampleRate() const
+{
+    // NOTE: decode function is processed under 24kHz due to hard coding in core library.
+    return 24000.0;
 }
 
 //==============================================================================

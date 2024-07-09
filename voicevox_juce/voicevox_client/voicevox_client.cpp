@@ -72,6 +72,7 @@ bool VoicevoxClient::isModelLoaded(juce::uint32 speaker_id) const
     return false;
 }
 
+//==============================================================================
 double VoicevoxClient::getSampleRate() const
 {
     if (isConnected())
