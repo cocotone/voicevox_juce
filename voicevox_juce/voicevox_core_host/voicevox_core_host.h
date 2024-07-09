@@ -33,8 +33,8 @@ public:
     //==============================================================================
     // High level API
     std::optional<juce::String> makeAudioQuery(juce::uint32 speaker_id, const juce::String& speak_words);
-    std::optional<juce::MemoryBlock> synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json);
-    std::optional<juce::MemoryBlock> tts(juce::uint32 speaker_id, const juce::String& speak_words);
+    std::optional<std::vector<std::byte>> synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json);
+    std::optional<std::vector<std::byte>> tts(juce::uint32 speaker_id, const juce::String& speak_words);
 
     //==============================================================================
     // Song API

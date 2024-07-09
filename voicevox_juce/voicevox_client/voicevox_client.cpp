@@ -89,7 +89,7 @@ std::int64_t VoicevoxClient::getSongTeacherSpeakerId() const
 }
 
 //==============================================================================
-std::optional<juce::MemoryBlock> VoicevoxClient::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
+std::optional<std::vector<std::byte>> VoicevoxClient::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
 {
     if (isConnected())
     {
@@ -99,7 +99,7 @@ std::optional<juce::MemoryBlock> VoicevoxClient::synthesis(juce::uint32 speaker_
     return std::nullopt;
 }
 
-std::optional<juce::MemoryBlock> VoicevoxClient::tts(juce::uint32 speaker_id, const juce::String& speak_words)
+std::optional<std::vector<std::byte>> VoicevoxClient::tts(juce::uint32 speaker_id, const juce::String& speak_words)
 {
     if (isConnected())
     {

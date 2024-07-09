@@ -189,7 +189,7 @@ std::optional<juce::String> VoicevoxCoreHost::makeAudioQuery(juce::uint32 speake
     return audio_query_json_string;
 }
 
-std::optional<juce::MemoryBlock> VoicevoxCoreHost::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
+std::optional<std::vector<std::byte>> VoicevoxCoreHost::synthesis(juce::uint32 speaker_id, const juce::String& audio_query_json)
 {
     // NOTE: Ouptut wav binary is sample rate converted to request value, therefore, the processing is effected after decode in core library.
 
@@ -208,14 +208,14 @@ std::optional<juce::MemoryBlock> VoicevoxCoreHost::synthesis(juce::uint32 speake
         return std::nullopt;
     }
 
-    juce::MemoryBlock memory_block(output_wav, output_binary_size);
+    std::vector<std::byte> output_buffer((std::byte*)output_wav, (std::byte*)output_wav + output_binary_size);
 
     voicevox_wav_free(output_wav);
 
-    return memory_block;
+    return output_buffer;
 }
 
-std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(juce::uint32 speaker_id, const juce::String& speak_words)
+std::optional<std::vector<std::byte>> VoicevoxCoreHost::tts(juce::uint32 speaker_id, const juce::String& speak_words)
 {
     // NOTE: Ouptut wav binary is sample rate converted to request value, therefore, the processing is effected after decode in core library.
 
@@ -234,11 +234,11 @@ std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(juce::uint32 speaker_id, 
         return std::nullopt;
     }
 
-    juce::MemoryBlock memory_block(output_wav, output_binary_size);
+    std::vector<std::byte> output_buffer((std::byte*)output_wav, (std::byte*)output_wav + output_binary_size);
 
     voicevox_wav_free(output_wav);
 
-    return memory_block;
+    return output_buffer;
 }
 
 //==============================================================================
