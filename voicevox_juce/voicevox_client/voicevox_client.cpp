@@ -118,11 +118,11 @@ std::optional<std::vector<std::int64_t>> VoicevoxClient::predictSingConsonantLen
     return std::nullopt;
 }
 
-std::optional<std::vector<float>> VoicevoxClient::predictSingF0(juce::uint32 speaker_id, const std::vector<std::int64_t>& phoneme, const std::vector<std::int64_t>& note)
+std::optional<std::vector<float>> VoicevoxClient::predictSingF0(juce::uint32 speaker_id, const std::vector<std::int64_t>& phoneme_flatten, const std::vector<std::int64_t>& note_vector)
 {
     if (isConnected())
     {
-        return sharedVoicevoxCoreHost->getObject().predict_sing_f0_forward(speaker_id, phoneme, note);
+        return sharedVoicevoxCoreHost->getObject().predict_sing_f0_forward(speaker_id, phoneme_flatten, note_vector);
     }
 
     return std::nullopt;
@@ -138,7 +138,7 @@ std::optional<std::vector<float>> VoicevoxClient::predictSingVolume(juce::uint32
     return std::nullopt;
 }
 
-std::optional<juce::Array<float>> VoicevoxClient::singBySfDecode(juce::uint32 speaker_id, const VoicevoxSfDecodeSource& decode_source)
+std::optional<std::vector<float>> VoicevoxClient::singBySfDecode(juce::uint32 speaker_id, const VoicevoxSfDecodeSource& decode_source)
 {
     if (isConnected())
     {

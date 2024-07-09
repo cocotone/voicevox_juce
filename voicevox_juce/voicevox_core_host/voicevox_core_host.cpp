@@ -241,8 +241,7 @@ std::optional<juce::MemoryBlock> VoicevoxCoreHost::tts(juce::uint32 speaker_id, 
 }
 
 //==============================================================================
-/*
-* 
+/** 
 #[no_mangle]
 pub extern "C" fn predict_sing_consonant_length_forward(
     length: i64,
@@ -405,8 +404,6 @@ std::optional<std::vector<float>> VoicevoxCoreHost::sf_decode_forward(juce::uint
     return std::vector<float>(output_data.getData(), output_data.getData() + output_data_length);
 }
 
-
-
 #if 0
 //==============================================================================
 std::optional<juce::Array<float>> VoicevoxCoreHost::predictDuration()
@@ -565,7 +562,6 @@ std::optional<juce::Array<float>> VoicevoxCoreHost::decode(juce::uint32 speaker_
     return output_buffer;
 }
 #endif
-
 
 }
 
