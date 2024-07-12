@@ -59,6 +59,7 @@ private:
 
 //==============================================================================
 VoicevoxCoreHost::VoicevoxCoreHost()
+    : isInitialized(false)
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
@@ -81,13 +82,20 @@ VoicevoxCoreHost::VoicevoxCoreHost()
         const char* utf8Str = voicevox_error_result_to_message(result);
         juce::Logger::outputDebugString(juce::CharPointer_UTF8(utf8Str));
     }
+
+    isInitialized = true;
 }
 
 VoicevoxCoreHost::~VoicevoxCoreHost()
 {
     jassert(sharedVoicevoxCoreLibrary->isHandled());
 
-    voicevox_finalize();
+    if (isInitialized.load())
+    {
+        voicevox_finalize();
+    }
+
+    isInitialized = false;
 }
 
 //==============================================================================

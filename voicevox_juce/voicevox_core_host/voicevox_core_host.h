@@ -53,7 +53,8 @@ private:
 
     //==============================================================================
     juce::SharedResourcePointer<VoicevoxCoreLibraryLoader> sharedVoicevoxCoreLibrary;
-    
+    std::atomic<bool> isInitialized;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VoicevoxCoreHost)
 };
 
